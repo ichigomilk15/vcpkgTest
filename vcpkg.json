@@ -1,0 +1,8 @@
+{
+  "name": "mygame",
+  "version-string": "0.1.0",
+  "builtin-baseline": "f368f080f98de39abef2bcd13bbd93af3006bab1",
+  "dependencies": [
+    "entt"
+  ]
+}

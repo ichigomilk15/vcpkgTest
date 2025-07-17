@@ -1,0 +1,46 @@
+@echo off
+rem ===============================================================
+rem  setup-dev.bat
+rem  - vcpkg サブモジュールの初期化
+rem  - vcpkg の bootstrap
+rem  - builtin-baseline の自動挿入
+rem  - 依存パッケージのインストール
+rem  - CMake Preset で構成 & ビルド
+rem  ===============================================================
+
+:: スクリプト自身の場所を基点にプロジェクトルートへ移動
+set "SCRIPT_DIR=%~dp0"
+cd /d "%SCRIPT_DIR%\.."  || goto :fail
+
+echo.
+echo === 1. Git submodule update ==================================
+git submodule update --init --depth 1 external/vcpkg || goto :fail
+
+echo.
+echo === 2. Bootstrap vcpkg ======================================
+call external\vcpkg\bootstrap-vcpkg.bat -disableMetrics || goto :fail
+
+echo.
+echo === 3. Insert/Update builtin-baseline =======================
+external\vcpkg\vcpkg.exe x-update-baseline ^
+        --project-root . ^
+        --add-default-baseline || goto :fail
+
+echo.
+echo === 4. Configure via CMake Preset ===========================
+cmake --preset windows-release || goto :fail
+
+echo.
+echo === 5. Build via CMake Preset ===============================
+cmake --build --preset windows-release --parallel %NUMBER_OF_PROCESSORS% || goto :fail
+
+echo.
+echo ===== ✔  Build Succeeded  =====
+pause
+exit /b 0
+
+:fail
+echo.
+echo ***** ✖  Build FAILED  *****
+pause
+exit /b 1
